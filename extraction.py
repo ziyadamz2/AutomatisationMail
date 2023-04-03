@@ -157,6 +157,7 @@ def enregistrement(x):
 
 while(True):
     date = str(datetime.datetime.now())
+    print(date[11:16])
     if(date[11:16]=="23:58"):
         oldtoken=cletoken()
         TOKEN=remove_old_token(oldtoken)
