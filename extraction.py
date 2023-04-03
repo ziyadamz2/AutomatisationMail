@@ -139,7 +139,7 @@ def info_etablissement(element,TOKEN):
 def enregistrement(x):
     date = datetime.datetime.now()
     tim=date.strftime("%Y-%m-%d")
-    filename="/home/ziyad/projet_informatique/AutomatisationMail/resultat/"+tim +".csv"
+    filename="/home/amzilziyad10/AutomatisationMail/resultat/"+tim +".csv"
     if os.path.exists(filename):
         os.remove(filename)        
     
