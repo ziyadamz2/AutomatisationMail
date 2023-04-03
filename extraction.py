@@ -154,16 +154,12 @@ def enregistrement(x):
 
 
 
-"""
+
 while(True):
     date = str(datetime.datetime.now())
-    print(date[11:16])
     if(date[11:16]=="23:58"):
-        """
-    
-
-T_acces=cletoken()
-"TOKEN=remove_old_token(oldtoken)"
-databrute=utilisation_donnees(T_acces[0])
-Gdata=traitement_données(databrute,T_acces[0])
-enregistrement(Gdata)
+        oldtoken=cletoken()
+        TOKEN=remove_old_token(oldtoken)
+        databrute=utilisation_donnees(T_acces[0])
+        Gdata=traitement_données(databrute,T_acces[0])
+        enregistrement(Gdata)
