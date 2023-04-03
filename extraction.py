@@ -112,9 +112,10 @@ def traitement_données(test,TOKEN):
     idx2 = cles.index('dateDebut')
     idx3 = cles.index('prenomUsuelUniteLegale')
     cles[idx3], cles[idx2] = cles[idx2], cles[idx3] 
+    """
     for donnéev3 in data:
-       x=info_etablissement(donnéev3,TOKEN)
-       print(x)
+        info_etablissement(donnéev3,TOKEN)
+    """
     return data, cles
     
 def info_etablissement(element,TOKEN):
@@ -125,15 +126,20 @@ def info_etablissement(element,TOKEN):
     response=requests.get(url,headers=headers)
     info_etab = response.json()
     del info_etab['header']
-    position=str(info_etab['etablissement']['adresseEtablissement']['numeroVoieEtablissement'])+" "+str(info_etab['etablissement']['adresseEtablissement']['typeVoieEtablissement'])+" "+str(info_etab['etablissement']['adresseEtablissement']['libelleVoieEtablissement'])
-    CP=info_etab['etablissement']['adresseEtablissement']['libelleCommuneEtablissement']
-    return CP, position
+    if (str(info_etab['etablissement']['adresseEtablissement']['numeroVoieEtablissement'])=="None" or str(info_etab['etablissement']['adresseEtablissement']['typeVoieEtablissement'])=="None" or str(info_etab['etablissement']['adresseEtablissement']['libelleVoieEtablissement'])=="None") or (str(info_etab['etablissement']['adresseEtablissement']['libelleCommuneEtablissement'])=="None"):
+        total=None
+        print(total)
+    else:
+        position=str(info_etab['etablissement']['adresseEtablissement']['numeroVoieEtablissement'])+" "+str(info_etab['etablissement']['adresseEtablissement']['typeVoieEtablissement'])+" "+str(info_etab['etablissement']['adresseEtablissement']['libelleVoieEtablissement'])
+        CP=info_etab['etablissement']['adresseEtablissement']['libelleCommuneEtablissement']
+        adresse=position+CP
+    return 
 
     
 def enregistrement(x):
     date = datetime.datetime.now()
     tim=date.strftime("%Y-%m-%d")
-    filename="C:/Users/amzil/OneDrive/Documents/Projet informatique/AutomatisationMail/resultat/"+tim +".csv"
+    filename="/home/ziyad/projet_informatique/AutomatisationMail/resultat/"+tim +".csv"
     if os.path.exists(filename):
         os.remove(filename)        
     
