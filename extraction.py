@@ -183,12 +183,12 @@ def envoyer_mail():
     message = "Bonjour,\nCi-joint, voici le fichier de prospection du "+tim+":\nBien à toi\nZiyad AMZIL"
     msg.attach(MIMEText(message))
 
-    nom_fichier = "/home/ziyad/projet_informatique/AutomatisationMail/resultat/2023-04-09.csv"
+    nom_fichier = "/home/ziyad/projet_informatique/AutomatisationMail/resultat/"+tim+".csv"
     piece_jointe = open(nom_fichier, "rb")
     part = MIMEBase('application', 'octet-stream')
     part.set_payload((piece_jointe).read())
     encoders.encode_base64(part)
-    part.add_header('Content-Disposition', "attachment; filename= %s" % "ficier_prospection")
+    part.add_header('Content-Disposition', "attachment; filename= %s" % nom_fichier)
     msg.attach(part)
 
     serveur_smtp = smtplib.SMTP(smtp_server, smtp_port)
@@ -202,7 +202,7 @@ def main():
     while(True):
         date = str(datetime.datetime.now())
         print(date[11:16])
-        if(date[11:16]=="01:10"):
+        if(date[11:16]=="01:50"):
             oldtoken=cletoken()
             TOKEN=remove_old_token(oldtoken)
             databrute=utilisation_donnees(TOKEN[0])
