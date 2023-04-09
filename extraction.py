@@ -3,7 +3,12 @@ import datetime
 import csv
 import os
 import base64
-
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.base import MIMEBase
+from email.mime.text import MIMEText
+from email.utils import COMMASPACE
+from email import encoders
 
 def cletoken():
      # Encodez les informations d'identification de l'application en Base64
@@ -112,11 +117,12 @@ def traitement_données(test,TOKEN):
     idx2 = cles.index('dateDebut')
     idx3 = cles.index('prenomUsuelUniteLegale')
     cles[idx3], cles[idx2] = cles[idx2], cles[idx3] 
-    """
+    donnée_adresse=[]
     for donnéev3 in data:
-        info_etablissement(donnéev3,TOKEN)
-    """
-    return data, cles
+        adresse_etab=info_etablissement(donnéev3,TOKEN)
+        donnée=donnéev3+adresse_etab
+        donnée_adresse=donnée_adresse+[donnée]
+    return donnée_adresse, cles
     
 def info_etablissement(element,TOKEN):
     headers={"Authorization":"Bearer "+TOKEN}
@@ -126,41 +132,82 @@ def info_etablissement(element,TOKEN):
     response=requests.get(url,headers=headers)
     info_etab = response.json()
     del info_etab['header']
-    if (str(info_etab['etablissement']['adresseEtablissement']['numeroVoieEtablissement'])=="None" or str(info_etab['etablissement']['adresseEtablissement']['typeVoieEtablissement'])=="None" or str(info_etab['etablissement']['adresseEtablissement']['libelleVoieEtablissement'])=="None") or (str(info_etab['etablissement']['adresseEtablissement']['libelleCommuneEtablissement'])=="None"):
-        total=None
-        print(total)
+    numVoie=str(info_etab['etablissement']['adresseEtablissement']['numeroVoieEtablissement'])
+    typeVoie=str(info_etab['etablissement']['adresseEtablissement']['typeVoieEtablissement'])
+    libelleVoie=str(info_etab['etablissement']['adresseEtablissement']['libelleVoieEtablissement'])
+    libelleCommune=str(info_etab['etablissement']['adresseEtablissement']['libelleCommuneEtablissement'])
+    code_postal=str(info_etab['etablissement']['adresseEtablissement']['codePostalEtablissement'])
+    if (numVoie=="None" or typeVoie=="None" or libelleVoie=="None" or libelleCommune=="None" or code_postal=="None"):
+        adresse=[None]
     else:
-        position=str(info_etab['etablissement']['adresseEtablissement']['numeroVoieEtablissement'])+" "+str(info_etab['etablissement']['adresseEtablissement']['typeVoieEtablissement'])+" "+str(info_etab['etablissement']['adresseEtablissement']['libelleVoieEtablissement'])
-        CP=info_etab['etablissement']['adresseEtablissement']['libelleCommuneEtablissement']
-        adresse=position+CP
-    return 
+        position=numVoie+" "+typeVoie+" "+libelleVoie
+        commune=libelleCommune
+        CP=code_postal
+        adresse=[position,commune,CP]
+    return adresse
 
     
 def enregistrement(x):
     date = datetime.datetime.now()
     tim=date.strftime("%Y-%m-%d")
-    filename="/home/amzilziyad10/AutomatisationMail/resultat/"+tim +".csv"
+    filename="/home/ziyad/projet_informatique/AutomatisationMail/resultat/"+tim +".csv"
     if os.path.exists(filename):
         os.remove(filename)        
-    
     f=open(filename, 'a',newline='')
     writer = csv.writer(f)
     file_size = os.path.getsize(filename)
     if (file_size<100):
-        writer.writerow(x[1][0:5])
+        writer.writerow(x[1][0:5]+['Adresse','Commune','CodePostal'])
         for i in range(len(x[0])):
-            writer.writerow(x[0][i][0:5])
+            if (x[0][i][6]!=None):
+                writer.writerow(x[0][i][0:5]+x[0][i][-3:])
+    
     return
 
+def envoyer_mail():
+    date = datetime.datetime.now()
+    tim=date.strftime("%Y-%m-%d")
+    filename="/home/ziyad/projet_informatique/AutomatisationMail/resultat/"+tim +".csv"
+    smtp_server = "smtp.gmail.com"
+    smtp_port = 587
+    expediteur = "devfbweb23@gmail.com"
+    mot_de_passe = "trlpfychbmbfaibm"
 
+    destinataire = "amzilziyad10@gmail.com"
 
+    msg = MIMEMultipart()
+    msg['From'] = expediteur
+    msg['To'] = destinataire
+    msg['Subject'] = "Extraction du "+tim
 
-while(True):
-    date = str(datetime.datetime.now())
-    print(date[11:16])
-    if(date[11:16]=="23:58"):
-        oldtoken=cletoken()
-        TOKEN=remove_old_token(oldtoken)
-        databrute=utilisation_donnees(TOKEN[0])
-        Gdata=traitement_données(databrute,TOKEN[0])
-        enregistrement(Gdata)
+    message = "Bonjour,\nVoici le fichier de porspection du "+tim+" ci joint: \nBien à toi\nZiyad AMZIL"
+    msg.attach(MIMEText(message))
+
+    nom_fichier = "/home/ziyad/projet_informatique/AutomatisationMail/resultat/2023-04-09.csv"
+    piece_jointe = open(nom_fichier, "rb")
+    part = MIMEBase('application', 'octet-stream')
+    part.set_payload((piece_jointe).read())
+    encoders.encode_base64(part)
+    part.add_header('Content-Disposition', "attachment; filename= %s" % "ficier_prospection")
+    msg.attach(part)
+
+    serveur_smtp = smtplib.SMTP(smtp_server, smtp_port)
+    serveur_smtp.starttls()
+    serveur_smtp.login(expediteur, mot_de_passe)
+    serveur_smtp.sendmail(expediteur, destinataire, msg.as_string())
+    serveur_smtp.quit()
+    return
+
+def main():
+    while(True):
+        date = str(datetime.datetime.now())
+        print(date[11:16])
+        if(date[11:16]=="23:58"):
+            oldtoken=cletoken()
+            TOKEN=remove_old_token(oldtoken)
+            databrute=utilisation_donnees(TOKEN[0])
+            data_traites=traitement_données(databrute,TOKEN[0])
+            enregistrement(data_traites)
+            envoyer_mail()
+    return
+main()
