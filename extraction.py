@@ -180,7 +180,7 @@ def envoyer_mail():
     msg['To'] = destinataire
     msg['Subject'] = "Extraction du "+tim
 
-    message = "Bonjour,\nVoici le fichier de porspection du "+tim+" ci joint: \nBien à toi\nZiyad AMZIL"
+    message = "Bonjour,\nCi-joint, voici le fichier de prospection du "+tim+":\nBien à toi\nZiyad AMZIL"
     msg.attach(MIMEText(message))
 
     nom_fichier = "/home/ziyad/projet_informatique/AutomatisationMail/resultat/2023-04-09.csv"
@@ -202,7 +202,7 @@ def main():
     while(True):
         date = str(datetime.datetime.now())
         print(date[11:16])
-        if(date[11:16]=="23:58"):
+        if(date[11:16]=="01:00"):
             oldtoken=cletoken()
             TOKEN=remove_old_token(oldtoken)
             databrute=utilisation_donnees(TOKEN[0])
@@ -210,4 +210,5 @@ def main():
             enregistrement(data_traites)
             envoyer_mail()
     return
+
 main()
