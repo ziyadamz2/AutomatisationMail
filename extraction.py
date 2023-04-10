@@ -202,7 +202,7 @@ def main():
     while(True):
         date = str(datetime.datetime.now())
         print(date[11:16])
-        if(date[11:16]=="01:50"):
+        if(date[11:16]=="09:45"):
             oldtoken=cletoken()
             TOKEN=remove_old_token(oldtoken)
             databrute=utilisation_donnees(TOKEN[0])
