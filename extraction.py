@@ -129,8 +129,8 @@ def info_etablissement(element,TOKEN):
     h="" 
     h=element[0]+element[5]
     url="https://api.insee.fr/entreprises/sirene/V3/siret/"+h
-    response=requests.get(url,headers=headers)
-    info_etab = response.json()
+    info_json=requests.get(url,headers=headers)
+    info_etab = info_json.json()
     del info_etab['header']
     numVoie=str(info_etab['etablissement']['adresseEtablissement']['numeroVoieEtablissement'])
     typeVoie=str(info_etab['etablissement']['adresseEtablissement']['typeVoieEtablissement'])
@@ -202,7 +202,7 @@ def main():
     while(True):
         date = str(datetime.datetime.now())
         print(date[11:16])
-        if(date[11:16]=="09:45"):
+        if(date[11:16]=="02:00"):
             oldtoken=cletoken()
             TOKEN=remove_old_token(oldtoken)
             databrute=utilisation_donnees(TOKEN[0])
