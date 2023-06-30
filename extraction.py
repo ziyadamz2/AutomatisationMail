@@ -199,16 +199,13 @@ def envoyer_mail():
     return
 
 def main():
-    while(True):
-        date = str(datetime.datetime.now())
-        print(date[11:16])
-        if(date[11:16]=="02:00"):
-            oldtoken=cletoken()
-            TOKEN=remove_old_token(oldtoken)
-            databrute=utilisation_donnees(TOKEN[0])
-            data_traites=traitement_données(databrute,TOKEN[0])
-            enregistrement(data_traites)
-            envoyer_mail()
-    return
-
+    date = str(datetime.datetime.now())
+    print(date[11:19])
+    if(True==True):                                             
+        oldtoken=cletoken()
+        TOKEN=remove_old_token(oldtoken)
+        databrute=utilisation_donnees(TOKEN[0])
+        data_traites=traitement_données(databrute,TOKEN[0])
+        enregistrement(data_traites)
+        envoyer_mail()
 main()
