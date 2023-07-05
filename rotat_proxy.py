@@ -3,7 +3,7 @@ import requests
 import pandas as pd
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.proxy import Proxy, ProxyType
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.firefox.options import Options
 
 
@@ -33,9 +33,21 @@ def create_safe_proxy(https_proxies):
 
 
 def connection(nom,prenom,departement):
-    driver = webdriver.Firefox()    
+    #chromedriver_path = Service('/usr/bin/chromedriver')
+    L=create_safe_proxy(proxy1())
+    chrome_options = Options()
+    x=L.index(":")
+    port_du_proxy=L[x+1:]
+    ip_du_proxy=L.replace(L[x:],"")
+
+    chrome_options.add_argument("--headless")
+    # Changer le proxy
+    chrome_options.set_preference("network.proxy.type", 1)
+    chrome_options.set_preference("network.proxy.http", ip_du_proxy)
+    chrome_options.set_preference("network.proxy.http_port", port_du_proxy)
+    driver = webdriver.Firefox(options = chrome_options)
+     
     urlf="https://www.pagesjaunes.fr/pagesblanches/recherche?quoiqui="+nom+"+"+prenom+"&ou=&univers=pagesblanches&idOu="
-    url="https://www.google.com/"
     driver.get(urlf)  
     driver.find_element(By.ID,"didomi-notice-agree-button").click()
     contacts = driver.find_elements(By.CSS_SELECTOR,".bi-generic")
@@ -55,6 +67,5 @@ def connection(nom,prenom,departement):
     print(client)
     driver.quit()
     return
-connection('Fatima','Chaouki',91)
-proxy_temprar=create_safe_proxy(proxy1())
+connection('Amine','Chaouki',91)
 
