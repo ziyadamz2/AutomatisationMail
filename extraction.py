@@ -21,8 +21,9 @@ def cletoken():
     
     payload = {'grant_type': 'client_credentials'}
     headers = {'Authorization': f'Basic {base64_string}'}
-    response = requests.post(token_url, data=payload, headers=headers)    
-    # Si la requête a réussi (code de statut HTTP 200), affichez le jeton d'authentification
+    response = requests.post(token_url, data=payload, headers=headers)            
+    
+    # Si la requête a réussi (code de statut HTTP 200), affichez le jeton d'authentificat ion
     if response.status_code != 200:
         print(f"La requête a échoué avec le code de statut HTTP {response.status_code}")
     else:
@@ -92,20 +93,17 @@ def traitement_données(test,TOKEN):
                     value=value+[valeur1]
             else:
                 value=value+[valeur]
+        
         for element in value:
             if element=='None':
                 del value
         x=x+[value]
-    
-    for key  in test['unitesLegales'][0]:
-        cles= cles+[key]
-    for key in test['unitesLegales'][0]['periodesUniteLegale'][0]:
-        cles= cles+[key]
-    cles.remove('periodesUniteLegale')
+        
+    cles=['siren', 'prenomUsuelUniteLegale', 'dateDebut', 'nomUniteLegale', 'activitePrincipaleUniteLegale', 'nicSiegeUniteLegale']
     i=2
     data=[]
     for element in x:
-        if element[1]!='[ND]'and len(element)==6 :
+        if element[1]!='[ND]' and len(element)==6 :
             data=data+[element]     
     for element in data:
         for value in unité.values():
@@ -114,6 +112,7 @@ def traitement_données(test,TOKEN):
                 idx2 = cles.index('dateDebut')
                 idx3 = cles.index('prenomUsuelUniteLegale')
                 element[idx3], element[idx2] = element[idx2], element[idx3]
+    #print(cles)
     idx2 = cles.index('dateDebut')
     idx3 = cles.index('prenomUsuelUniteLegale')
     cles[idx3], cles[idx2] = cles[idx2], cles[idx3] 
@@ -151,16 +150,20 @@ def enregistrement(x):
     date = datetime.datetime.now()
     tim=date.strftime("%Y-%m-%d")
     filename="/home/ziyad/projet_informatique/AutomatisationMail/resultat/"+tim +".csv"
+    
     if os.path.exists(filename):
         os.remove(filename)        
     f=open(filename, 'a',newline='')
     writer = csv.writer(f)
     file_size = os.path.getsize(filename)
+    
     if (file_size<100):
-        writer.writerow(x[1][0:5]+['Adresse','Commune','CodePostal'])
+        writer.writerow(x[1][0:5]+['Adresse','Commune','CodePostal','NuméroC1'])
         for i in range(len(x[0])):
             if (x[0][i][6]!=None):
-                writer.writerow(x[0][i][0:5]+x[0][i][-3:])
+                localisation=x[0][i][-3:]
+                rendu_excel=x[0][i][0:5]+localisation
+                writer.writerow(rendu_excel)
     
     return
 
