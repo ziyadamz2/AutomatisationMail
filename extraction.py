@@ -1,6 +1,7 @@
 import requests
 import datetime
 import csv
+import json
 import os
 import base64
 import smtplib
@@ -9,6 +10,7 @@ from email.mime.base import MIMEBase
 from email.mime.text import MIMEText
 from email.utils import COMMASPACE
 from email import encoders
+from find_numero import numero
 
 def cletoken():
      # Encodez les informations d'identification de l'application en Base64
@@ -112,7 +114,6 @@ def traitement_données(test,TOKEN):
                 idx2 = cles.index('dateDebut')
                 idx3 = cles.index('prenomUsuelUniteLegale')
                 element[idx3], element[idx2] = element[idx2], element[idx3]
-    #print(cles)
     idx2 = cles.index('dateDebut')
     idx3 = cles.index('prenomUsuelUniteLegale')
     cles[idx3], cles[idx2] = cles[idx2], cles[idx3] 
@@ -163,14 +164,14 @@ def enregistrement(x):
             if (x[0][i][6]!=None):
                 localisation=x[0][i][-3:]
                 rendu_excel=x[0][i][0:5]+localisation
+                
                 writer.writerow(rendu_excel)
-    
+    f.close()
     return
 
 def envoyer_mail():
     date = datetime.datetime.now()
     tim=date.strftime("%Y-%m-%d")
-    filename="/home/ziyad/projet_informatique/AutomatisationMail/resultat/"+tim +".csv"
     smtp_server = "smtp.gmail.com"
     smtp_port = 587
     expediteur = "devfbweb23@gmail.com"
@@ -210,5 +211,6 @@ def main():
         databrute=utilisation_donnees(TOKEN[0])
         data_traites=traitement_données(databrute,TOKEN[0])
         enregistrement(data_traites)
+        numero()
         envoyer_mail()
 main()

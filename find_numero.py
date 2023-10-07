@@ -1,12 +1,34 @@
 from time import sleep
 import datetime
 import csv
+import re
 import requests
 import pandas as pd
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.firefox.options import Options
 
+def levenshtein_distance(s1, s2):
+    if len(s1) < len(s2):
+        return levenshtein_distance(s2, s1)
+    if len(s2) == 0:
+        return len(s1)
+    previous_row = range(len(s2) + 1)
+    for i, c1 in enumerate(s1):
+        current_row = [i + 1]
+        for j, c2 in enumerate(s2):
+            insertions = previous_row[j + 1] + 1
+            deletions = current_row[j] + 1
+            substitutions = previous_row[j] + (c1 != c2)
+            current_row.append(min(insertions, deletions, substitutions))
+        previous_row = current_row
+    return previous_row[-1]
+
+def similarity_percentage(s1, s2):
+    distance = levenshtein_distance(s1, s2)
+    max_len = max(len(s1), len(s2))
+    similarity = 1 - (distance / max_len)
+    return similarity * 100
 
 def proxy1():
     response = requests.get("https://free-proxy-list.net/")
@@ -33,7 +55,7 @@ def create_safe_proxy(https_proxies):
     return
 
 
-def connection(nom,prenom,departement):
+def connection(nom,prenom,cp):
     L=None
     while(L==None):
         L=create_safe_proxy(proxy1())
@@ -63,13 +85,11 @@ def connection(nom,prenom,departement):
     }
     chrome_options.add_argument("--headless")
     # Changer le proxy
-    print(nom_departements[str(departement)])
     chrome_options.set_preference("network.proxy.type", 1)
     chrome_options.set_preference("network.proxy.http", ip_du_proxy)
     chrome_options.set_preference("network.proxy.http_port", port_du_proxy)
     driver = webdriver.Firefox(options = chrome_options)
-    urlf="https://www.pagesjaunes.fr/pagesblanches/recherche?quoiqui="+prenom+"+"+nom+"&ou="+nom_departements[departement]+"+("+departement+")&univers=pagesblanches&idOu="
-    print(urlf)
+    urlf="https://www.pagesjaunes.fr/pagesblanches/recherche?quoiqui="+prenom+"+"+nom+"&ou="+nom_departements[cp]+"+("+cp+")&univers=pagesblanches&idOu="
     driver.get(urlf)  
     driver.find_element(By.ID,"didomi-notice-agree-button").click()
     contacts = driver.find_elements(By.CSS_SELECTOR,".bi-generic")
@@ -86,53 +106,47 @@ def connection(nom,prenom,departement):
         except:
             pass       
     driver.quit()
-    print(client)
     return client
 
 
 def numero():
     date = datetime.datetime.now()
     tim=date.strftime("%Y-%m-%d")
-    filename="/home/ziyad/projet_informatique/AutomatisationMail/resultat/"+tim +".csv"
-    df = pd.read_csv("/home/ziyad/projet_informatique/AutomatisationMail/resultat/2023-09-25.csv")
-    taille_tableau=df.shape
-    print((type(df['Commune'][1])))
-    
-    """
+    filename="/home/ziyad/projet_informatique/AutomatisationMail/resultat/2023-10-04.csv"
+    df = pd.read_csv(filename)
+    taille_tableau=df.shape   
+    b=0 
     for i in range(taille_tableau[0]):
-        prenom=df['prenomUsuelUniteLegale'][i]
-        nom=df['nomUniteLegale'][i]
-        cp=df['CodePostal'][i]                        #code postal à 4 chiffre
-        departement=df['Commune'][i]
-        resultat=connection(nom,prenom,departement)
-        id2=(nom+" "+prenom).lower()
-        if(resultat!=[]):
-            print("resultat non nul")
-            for element in resultat:
-                numero=element[2]
-                departement=re.findall(r'\b\d{5}\b', element[1])                  #obtention du code postale 5 chiffres identiques
-                id1=element[0].lower()
-                nom1=id1.split(" ",1)
-                print(nom,id1)
-                print(element)
-
-                if(id1.lower()==id2.lower()):#
-                    print("le nom et prenom sont identiques", id1.lower(),"/",id2.lower())                 
-                    if(departement==cp):#fiabilité=90%
-                        print("les codes postaux sont identiques", departement,"/",cp)         
-                        numero_exact=numero
-                        
-                elif((nom in id1)==True):
-                    print("les noms sont identiques", nom.lower,"/",nom1[1].lower)
-                    if(departement==cp):#fiabilité=60%
-                        print("les codes postaux sont identiques", departement,"/",cp)         
-                        numero_exact=numero
+        
+        fprenom=df['prenomUsuelUniteLegale'][i]
+        fnom=df['nomUniteLegale'][i]
+        f2cp=str(df['CodePostal'][i])[0:2]                     #code postal à 4 chiffre
+        adresse=df['Adresse'][i]+" "+df['Commune'][i]+" "+str(df['CodePostal'][i])
+        sresultat=connection(fnom,fprenom,f2cp)
+        fid=(fnom+" "+fprenom).lower()
+        if(sresultat!=[]):
+            indice=[]
+            h=[]
+            for element in sresultat:
+                sid=element[0].lower()
+                sadresse=element[1].lower()
+                h=h+[element[2]]
+                i=similarity_percentage(sadresse,adresse)
+                if (fid==sid ):         #obtention du code postale 5 chiffres identiques
+                    indice=indice+[i]                                            
                 else:
-                    numero_exact=numero_exact
+                    indice=indice+[0]
+            if (max(indice)==0):
+                numero_exact=h
+                df.at[b,'NuméroC1']=str(numero_exact)
+            else:  
+                numero_exact=sresultat[indice.index(max(indice))][2]
+                df.at[b,'NuméroC1']=str(numero_exact)
         else:
-            numero_exact=numero_exact
-                
-        """
-    return
-#numero()
-connection("ouzaid","wacim","95")
+            numero_exact=[]
+            df.at[b,'NuméroC1']=str(numero_exact)
+            
+        
+        b=b+1
+    df.to_csv(filename, index=False)
+    return 
