@@ -151,7 +151,7 @@ def info_etablissement(element,TOKEN):
 def enregistrement(x):
     date = datetime.datetime.now()
     tim=date.strftime("%Y-%m-%d")
-    filename="/home/ziyad/projetinformatique/AutomatisationMail/resultat/"+tim+".csv"
+    filename="/home/ubuntu/AutomatisationMail/resultat/"+tim+".csv"
     
     if os.path.exists(filename):
         os.remove(filename)        
@@ -188,7 +188,7 @@ def envoyer_mail():
     message = "Bonjour,\nCi-joint, voici le fichier de prospection du "+tim+":\nBien à toi\nZiyad AMZIL"
     msg.attach(MIMEText(message))
 
-    nom_fichier="/home/ziyad/projetinformatique/AutomatisationMail/resultat/"+tim+".csv"
+    nom_fichier="/home/ubuntu/AutomatisationMail/resultat/"+tim+".csv"
     piece_jointe = open(nom_fichier, "rb")
     part = MIMEBase('application', 'octet-stream')
     part.set_payload((piece_jointe).read())

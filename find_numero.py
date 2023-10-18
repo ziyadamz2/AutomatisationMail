@@ -118,7 +118,7 @@ def connection(nom,prenom,cp):
 def numero():
     date = datetime.datetime.now()
     tim=date.strftime("%Y-%m-%d")
-    filename="/home/ziyad/projetinformatique/AutomatisationMail/resultat/"+tim+".csv"
+    filename="/home/ubuntu/AutomatisationMail/resultat/"+tim+".csv"
     df = pd.read_csv(filename)
     taille_tableau=df.shape   
     b=0 
