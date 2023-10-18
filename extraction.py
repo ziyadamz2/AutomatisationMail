@@ -12,6 +12,7 @@ from email.utils import COMMASPACE
 from email import encoders
 from find_numero import numero
 
+
 def cletoken():
      # Encodez les informations d'identification de l'application en Base64
     consumer_key = 'K7A0YOXKaSnmjSL4hgFFiYHjus4a'
@@ -150,7 +151,7 @@ def info_etablissement(element,TOKEN):
 def enregistrement(x):
     date = datetime.datetime.now()
     tim=date.strftime("%Y-%m-%d")
-    filename="/home/ziyad/projet_informatique/AutomatisationMail/resultat/"+tim +".csv"
+    filename="/home/ziyad/projetinformatique/AutomatisationMail/resultat/"+tim+".csv"
     
     if os.path.exists(filename):
         os.remove(filename)        
@@ -187,7 +188,7 @@ def envoyer_mail():
     message = "Bonjour,\nCi-joint, voici le fichier de prospection du "+tim+":\nBien à toi\nZiyad AMZIL"
     msg.attach(MIMEText(message))
 
-    nom_fichier = "/home/ziyad/projet_informatique/AutomatisationMail/resultat/"+tim+".csv"
+    nom_fichier="/home/ziyad/projetinformatique/AutomatisationMail/resultat/"+tim+".csv"
     piece_jointe = open(nom_fichier, "rb")
     part = MIMEBase('application', 'octet-stream')
     part.set_payload((piece_jointe).read())
@@ -211,6 +212,7 @@ def main():
         databrute=utilisation_donnees(TOKEN[0])
         data_traites=traitement_données(databrute,TOKEN[0])
         enregistrement(data_traites)
+        envoyer_mail()
         numero()
         envoyer_mail()
 main()

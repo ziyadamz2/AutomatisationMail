@@ -7,6 +7,8 @@ import pandas as pd
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 def levenshtein_distance(s1, s2):
     if len(s1) < len(s2):
@@ -90,11 +92,14 @@ def connection(nom,prenom,cp):
     chrome_options.set_preference("network.proxy.http_port", port_du_proxy)
     driver = webdriver.Firefox(options = chrome_options)
     urlf="https://www.pagesjaunes.fr/pagesblanches/recherche?quoiqui="+prenom+"+"+nom+"&ou="+nom_departements[cp]+"+("+cp+")&univers=pagesblanches&idOu="
-    driver.get(urlf)  
+    driver.get(urlf)
+    
+    sleep(30)
     driver.find_element(By.ID,"didomi-notice-agree-button").click()
-    contacts = driver.find_elements(By.CSS_SELECTOR,".bi-generic")
-    sleep(20)
-    client=[]
+    contacts = driver.find_elements(By.CSS_SELECTOR, ".bi-generic")
+    print(contacts)
+    client = []
+ 
     for contact in contacts:
         try: 
             id=contact.find_element(By.TAG_NAME,"h3").text
@@ -105,14 +110,15 @@ def connection(nom,prenom,cp):
             client.append((id,adress,tel))
         except:
             pass       
-    driver.quit()
+    driver.close()
+    print(client)
     return client
 
 
 def numero():
     date = datetime.datetime.now()
     tim=date.strftime("%Y-%m-%d")
-    filename="/home/ziyad/projet_informatique/AutomatisationMail/resultat/2023-10-04.csv"
+    filename="/home/ziyad/projetinformatique/AutomatisationMail/resultat/"+tim+".csv"
     df = pd.read_csv(filename)
     taille_tableau=df.shape   
     b=0 
@@ -122,6 +128,8 @@ def numero():
         fnom=df['nomUniteLegale'][i]
         f2cp=str(df['CodePostal'][i])[0:2]                     #code postal à 4 chiffre
         adresse=df['Adresse'][i]+" "+df['Commune'][i]+" "+str(df['CodePostal'][i])
+        if int(f2cp)>95:
+            f2cp=str(df['CodePostal'][i])[0:3]
         sresultat=connection(fnom,fprenom,f2cp)
         fid=(fnom+" "+fprenom).lower()
         if(sresultat!=[]):
@@ -145,8 +153,7 @@ def numero():
         else:
             numero_exact=[]
             df.at[b,'NuméroC1']=str(numero_exact)
-            
-        
+        df.to_csv(filename, index=False)
         b=b+1
-    df.to_csv(filename, index=False)
     return 
+
